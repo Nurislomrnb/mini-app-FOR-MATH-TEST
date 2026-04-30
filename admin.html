@@ -1,1 +1,722 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Yaratish</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700&display=swap');
 
+  :root {
+    --bg: #0f0f12;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: #2e2e3e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #4ade80;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Manrope', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .header p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .step-bar {
+    display: flex;
+    gap: 4px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-dot {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--success); }
+
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .field { margin-bottom: 18px; }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .count-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .count-label { font-size: 13px; color: var(--text); }
+  .count-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cnt-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .cnt-btn:active { background: var(--accent); }
+
+  .cnt-val {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .summary-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .summary-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .ic-yopiq { background: rgba(108,99,255,0.15); }
+  .ic-ochiq { background: rgba(255,101,132,0.15); }
+
+  /* Javoblar grid */
+  .q-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .q-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .q-type-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .badge-yopiq { background: rgba(108,99,255,0.15); color: #a79fff; }
+  .badge-ochiq { background: rgba(255,101,132,0.15); color: #ff8fa3; }
+
+  /* Yopiq savol uchun ABCD */
+  .abcd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .abcd-btn {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .abcd-btn span.letter {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .abcd-btn:active { transform: scale(0.96); }
+
+  .abcd-btn.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.15);
+    color: #a79fff;
+  }
+
+  /* Ochiq savol uchun input */
+  .open-answer-box { margin-top: 10px; }
+
+  /* Progress */
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s;
+  }
+
+  /* Navigation */
+  .nav-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    padding: 13px;
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: #000;
+    grid-column: 1 / -1;
+    font-size: 15px;
+  }
+
+  .btn-full { grid-column: 1 / -1; }
+
+  .bottom-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .skip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .skip-info {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .page-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .mini-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(108,99,255,0.15);
+    color: #a79fff;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .answer-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .ap-left { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .ap-right { color: var(--accent); font-family: var(--mono); font-weight: 600; }
+  .ap-right.ochiq { color: var(--accent2); font-size: 12px; max-width: 60%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .review-scroll { max-height: 340px; overflow-y: auto; }
+
+  .divider {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 14px 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">✍️</div>
+  <div>
+    <h1>Test Yaratish</h1>
+    <p>Admin panel</p>
+  </div>
+</div>
+
+<div class="step-bar">
+  <div class="step-dot active" id="s1"></div>
+  <div class="step-dot" id="s2"></div>
+  <div class="step-dot" id="s3"></div>
+  <div class="step-dot" id="s4"></div>
+</div>
+
+<!-- PAGE 1: Asosiy ma'lumotlar -->
+<div class="page active" id="page1">
+  <div style="height:16px"></div>
+  <div class="mini-badge">1 / 4 — Asosiy ma'lumot</div>
+  <div class="page-title">Test ma'lumotlari</div>
+  <div class="page-sub">Test nomi va unikal kodini kiriting</div>
+
+  <div class="field">
+    <div class="label">Test nomi</div>
+    <input type="text" id="nom" placeholder="Masalan: Matematika 10-sinf" />
+  </div>
+
+  <div class="field">
+    <div class="label">Test kodi</div>
+    <input type="text" id="kod" placeholder="Masalan: MAT2024" maxlength="10" />
+  </div>
+
+  <button class="btn btn-primary btn-full" onclick="goPage2()" style="width:100%;margin-top:8px;">
+    Davom etish →
+  </button>
+</div>
+
+<!-- PAGE 2: Savollar soni -->
+<div class="page" id="page2">
+  <div style="height:16px"></div>
+  <div class="mini-badge">2 / 4 — Savollar soni</div>
+  <div class="page-title">Nechta savol?</div>
+  <div class="page-sub">Yopiq va ochiq savollar sonini belgilang</div>
+
+  <div class="field">
+    <div class="count-box">
+      <div>
+        <div class="count-label">🔘 Yopiq savollar</div>
+        <div class="count-sub">A, B, C, D variantli</div>
+      </div>
+      <div class="counter">
+        <button class="cnt-btn" onclick="changeCount('yopiq',-1)">−</button>
+        <div class="cnt-val" id="yopiq-val">0</div>
+        <button class="cnt-btn" onclick="changeCount('yopiq',1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="count-box">
+      <div>
+        <div class="count-label">✏️ Ochiq savollar</div>
+        <div class="count-sub">Matn javob</div>
+      </div>
+      <div class="counter">
+        <button class="cnt-btn" onclick="changeCount('ochiq',-1)">−</button>
+        <div class="cnt-val" id="ochiq-val">0</div>
+        <button class="cnt-btn" onclick="changeCount('ochiq',1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-outline" onclick="setPage(1)">← Orqaga</button>
+    <button class="btn btn-primary" onclick="goPage3()">Davom →</button>
+  </div>
+</div>
+
+<!-- PAGE 3: Javoblarni kiritish -->
+<div class="page" id="page3">
+  <div style="height:16px"></div>
+  <div class="mini-badge" id="q-badge">3 / 4 — Javoblar</div>
+  <div class="page-title" id="q-page-title">Javoblarni kiriting</div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="q-progress" style="width:0%"></div>
+  </div>
+
+  <div class="q-header">
+    <div>
+      <div class="q-title" id="q-label">Savol</div>
+      <div class="q-num" id="q-num">1</div>
+    </div>
+    <div class="q-type-badge" id="q-type-badge">Yopiq</div>
+  </div>
+
+  <!-- Yopiq savol -->
+  <div id="yopiq-input">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">To'g'ri javobni tanlang:</div>
+    <div class="abcd-grid">
+      <button class="abcd-btn" onclick="selectAbcd('A')"><span class="letter">A</span></button>
+      <button class="abcd-btn" onclick="selectAbcd('B')"><span class="letter">B</span></button>
+      <button class="abcd-btn" onclick="selectAbcd('C')"><span class="letter">C</span></button>
+      <button class="abcd-btn" onclick="selectAbcd('D')"><span class="letter">D</span></button>
+    </div>
+  </div>
+
+  <!-- Ochiq savol -->
+  <div id="ochiq-input" style="display:none;">
+    <div class="open-answer-box">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">To'g'ri javobni kiriting:</div>
+      <input type="text" id="ochiq-ans" placeholder="To'g'ri javob..." />
+    </div>
+  </div>
+
+  <div class="nav-btns" style="margin-top:20px;">
+    <button class="btn btn-outline" onclick="prevQ()">← Oldingi</button>
+    <button class="btn btn-primary" id="next-q-btn" onclick="nextQ()">Keyingi →</button>
+  </div>
+</div>
+
+<!-- PAGE 4: Ko'rib chiqish va saqlash -->
+<div class="page" id="page4">
+  <div style="height:16px"></div>
+  <div class="mini-badge">4 / 4 — Tasdiqlash</div>
+  <div class="page-title">Tekshirib ko'ring</div>
+  <div class="page-sub">Barcha javoblarni tekshirib so'ng saqlang</div>
+
+  <div class="summary-card">
+    <div class="summary-icon ic-yopiq">🔘</div>
+    <div>
+      <div style="font-size:14px;font-weight:600;" id="rev-nom">—</div>
+      <div style="font-size:12px;color:var(--muted);">Kod: <span id="rev-kod" style="font-family:var(--mono);color:var(--accent);">—</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:#a79fff;" id="rev-yopiq">0</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Yopiq savol</div>
+    </div>
+    <div style="background:rgba(255,101,132,0.08);border:1px solid rgba(255,101,132,0.2);border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:#ff8fa3;" id="rev-ochiq">0</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Ochiq savol</div>
+    </div>
+  </div>
+
+  <div class="divider">Yopiq savollar</div>
+  <div class="review-scroll" id="review-yopiq"></div>
+
+  <div class="divider" id="rev-ochiq-title">Ochiq savollar</div>
+  <div class="review-scroll" id="review-ochiq"></div>
+
+  <div class="nav-btns" style="margin-top:16px;">
+    <button class="btn btn-outline" onclick="setPage(3)">← Orqaga</button>
+    <button class="btn btn-success" onclick="saveTest()">✅ Saqlash va Faollashtirish</button>
+  </div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.BackButton.show();
+tg.BackButton.onClick(() => {
+  const cur = getCurrentPage();
+  if (cur > 1) setPage(cur - 1);
+  else tg.close();
+});
+
+let state = {
+  nom: '', kod: '',
+  yopiq: 0, ochiq: 0,
+  answers: {},   // {1: 'A', 2: 'B', ..., 21: 'Toshkent'}
+  currentQ: 1,
+  totalQ: 0
+};
+
+function getCurrentPage() {
+  for (let i = 1; i <= 4; i++) {
+    if (document.getElementById('page'+i).classList.contains('active')) return i;
+  }
+  return 1;
+}
+
+function setPage(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('page'+i).classList.toggle('active', i === n);
+    const dot = document.getElementById('s'+i);
+    dot.classList.remove('active','done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+}
+
+function goPage2() {
+  state.nom = document.getElementById('nom').value.trim();
+  state.kod = document.getElementById('kod').value.trim().toUpperCase();
+  if (!state.nom) return alert('Test nomini kiriting!');
+  if (!state.kod) return alert('Test kodini kiriting!');
+  setPage(2);
+}
+
+function changeCount(type, delta) {
+  state[type] = Math.max(0, state[type] + delta);
+  document.getElementById(type+'-val').textContent = state[type];
+}
+
+function goPage3() {
+  state.totalQ = state.yopiq + state.ochiq;
+  if (state.totalQ === 0) return alert('Kamida 1 ta savol kiriting!');
+  state.currentQ = 1;
+  renderQ(1);
+  setPage(3);
+}
+
+function getQType(n) {
+  return n <= state.yopiq ? 'yopiq' : 'ochiq';
+}
+
+function renderQ(n) {
+  const type = getQType(n);
+  const total = state.totalQ;
+
+  document.getElementById('q-num').textContent = n;
+  document.getElementById('q-label').textContent = `${n} / ${total} — savol`;
+  document.getElementById('q-progress').style.width = ((n-1)/total*100)+'%';
+
+  const badge = document.getElementById('q-type-badge');
+  if (type === 'yopiq') {
+    badge.textContent = 'Yopiq';
+    badge.className = 'q-type-badge badge-yopiq';
+    document.getElementById('yopiq-input').style.display = 'block';
+    document.getElementById('ochiq-input').style.display = 'none';
+    // Avvalgi javobni ko'rsat
+    const prev = state.answers[n];
+    document.querySelectorAll('.abcd-btn').forEach(b => {
+      b.classList.toggle('selected', b.textContent.trim() === prev);
+    });
+  } else {
+    badge.textContent = 'Ochiq';
+    badge.className = 'q-type-badge badge-ochiq';
+    document.getElementById('yopiq-input').style.display = 'none';
+    document.getElementById('ochiq-input').style.display = 'block';
+    document.getElementById('ochiq-ans').value = state.answers[n] || '';
+  }
+
+  // Oxirgi savolda "Tugatish" ko'rsat
+  const btn = document.getElementById('next-q-btn');
+  btn.textContent = n === total ? 'Tugatish ✓' : 'Keyingi →';
+}
+
+function selectAbcd(letter) {
+  state.answers[state.currentQ] = letter;
+  document.querySelectorAll('.abcd-btn').forEach(b => {
+    b.classList.toggle('selected', b.querySelector('.letter').textContent === letter);
+  });
+}
+
+function nextQ() {
+  const n = state.currentQ;
+  const type = getQType(n);
+
+  if (type === 'yopiq') {
+    if (!state.answers[n]) return alert('Javobni tanlang!');
+  } else {
+    const val = document.getElementById('ochiq-ans').value.trim();
+    if (!val) return alert('Javobni kiriting!');
+    state.answers[n] = val;
+  }
+
+  if (n < state.totalQ) {
+    state.currentQ++;
+    renderQ(state.currentQ);
+  } else {
+    renderReview();
+    setPage(4);
+  }
+}
+
+function prevQ() {
+  if (state.currentQ > 1) {
+    state.currentQ--;
+    renderQ(state.currentQ);
+  } else {
+    setPage(2);
+  }
+}
+
+function renderReview() {
+  document.getElementById('rev-nom').textContent = state.nom;
+  document.getElementById('rev-kod').textContent = state.kod;
+  document.getElementById('rev-yopiq').textContent = state.yopiq;
+  document.getElementById('rev-ochiq').textContent = state.ochiq;
+
+  let yHtml = '', oHtml = '';
+  for (let i = 1; i <= state.totalQ; i++) {
+    const type = getQType(i);
+    const ans = state.answers[i] || '—';
+    if (type === 'yopiq') {
+      yHtml += `<div class="answer-preview">
+        <span class="ap-left">${i}-savol</span>
+        <span class="ap-right">${ans}</span>
+      </div>`;
+    } else {
+      oHtml += `<div class="answer-preview">
+        <span class="ap-left">${i}-savol</span>
+        <span class="ap-right ochiq">${ans}</span>
+      </div>`;
+    }
+  }
+  document.getElementById('review-yopiq').innerHTML = yHtml || '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Yo\'q</div>';
+  document.getElementById('review-ochiq').innerHTML = oHtml || '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Yo\'q</div>';
+  if (state.ochiq === 0) document.getElementById('rev-ochiq-title').style.display = 'none';
+}
+
+function saveTest() {
+  const answers = [];
+  for (let i = 1; i <= state.totalQ; i++) {
+    answers.push({
+      savol_raqam: i,
+      tur: getQType(i),
+      togri_javob: state.answers[i] || ''
+    });
+  }
+
+  const data = {
+    nom: state.nom,
+    kod: state.kod,
+    yopiq_soni: state.yopiq,
+    ochiq_soni: state.ochiq,
+    answers: answers
+  };
+
+  tg.sendData(JSON.stringify(data));
+}
+</script>
+</body>
+</html>
