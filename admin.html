@@ -577,18 +577,17 @@ function setPage(n) {
 }
 
 function goPage2() {
-  state.nom = document.getElementById('nom').value.trim();
-  state.kod = document.getElementById('kod').value.trim().toUpperCase();
-  if (!state.nom) return alert('Test nomini kiriting!');
-  if (!state.kod) return alert('Test kodini kiriting!');
+  const nomVal = document.getElementById('nom').value.trim();
+  const kodVal = document.getElementById('kod').value.trim();
+  
+  if (!nomVal) { alert('Test nomini kiriting!'); return; }
+  if (!kodVal) { alert('Test kodini kiriting!'); return; }
+  
+  state.nom = nomVal;
+  state.kod = kodVal.toUpperCase();
+  
   setPage(2);
 }
-
-function changeCount(type, delta) {
-  state[type] = Math.max(0, state[type] + delta);
-  document.getElementById(type+'-val').textContent = state[type];
-}
-
 function goPage3() {
   state.totalQ = state.yopiq + state.ochiq;
   if (state.totalQ === 0) return alert('Kamida 1 ta savol kiriting!');
