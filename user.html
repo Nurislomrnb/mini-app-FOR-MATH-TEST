@@ -6,35 +6,37 @@
 <title>Test Ishlash</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f12; color: #e8e8f0; min-height: 100vh; padding: 16px; }
-h1 { text-align: center; margin-bottom: 20px; color: #6c63ff; }
-.test-info { background: #1a1a22; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
-.question { background: #1a1a22; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
-.q-number { font-size: 18px; font-weight: 700; color: #6c63ff; margin-bottom: 12px; }
-.abcd { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.option { padding: 16px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; font-size: 17px; cursor: pointer; text-align: center; }
-.option.selected { border-color: #6c63ff; background: rgba(108,99,255,0.2); }
-.open-input { width: 100%; padding: 14px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; color: #e8e8f0; font-size: 16px; }
-.btn { width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
-.btn-primary { background: #6c63ff; color: white; }
-.progress { height: 6px; background: #2e2e3e; border-radius: 3px; margin: 20px 0; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #6c63ff, #a79fff); border-radius: 3px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f12; color: #e8e8f0; min-height: 100vh; padding: 16px; }
+    h1 { text-align: center; margin-bottom: 20px; color: #6c63ff; }
+    .test-info { background: #1a1a22; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+    .question { background: #1a1a22; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
+    .q-number { font-size: 18px; font-weight: 700; color: #6c63ff; margin-bottom: 12px; }
+    .abcd { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .option { padding: 16px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; font-size: 17px; cursor: pointer; text-align: center; }
+    .option.selected { border-color: #6c63ff; background: rgba(108,99,255,0.25); }
+    .open-input { width: 100%; padding: 14px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; color: #e8e8f0; font-size: 16px; margin-top: 8px; }
+    .btn { width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #6c63ff; color: white; }
+    .loading { text-align: center; padding: 40px; color: #888; }
 </style>
 </head>
 <body>
 
-<h1 id="test-nom">Test Yuklanmoqda...</h1>
-<div class="test-info">
+<h1 id="test-nom">Test yuklanmoqda...</h1>
+<div class="test-info" id="test-info" style="display:none;">
   <div>Kod: <b id="test-kod"></b></div>
-  <div>Savol: <b id="current-q">1</b> / <b id="total-q">0</b></div>
+  <div>Savollar soni: <b id="total-q">0</b></div>
 </div>
 
-<div id="questions-container"></div>
+<div id="loading" class="loading">Savollar yuklanmoqda...</div>
+<div id="questions-container" style="display:none;"></div>
 
-<div class="progress"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
+<div class="progress" style="height:6px; background:#2e2e3e; border-radius:3px; margin:20px 0; display:none;" id="progress-bar">
+  <div class="progress-fill" id="progress-fill" style="height:100%; background:#6c63ff; border-radius:3px; width:0%;"></div>
+</div>
 
-<button class="btn btn-primary" id="btn-finish" style="display:none;">✅ Testni Yakunlash</button>
+<button class="btn btn-primary" id="btn-finish" style="display:none;">✅ Testni Yakunlash va Yuborish</button>
 
 <script>
 const tg = window.Telegram.WebApp;
@@ -44,12 +46,10 @@ tg.BackButton.show();
 let testKod = "";
 let questions = [];
 let userAnswers = {};
-let currentQuestion = 1;
 
-// URL dan kodni olish
+// URL dan kod olish
 function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
+    return new URLSearchParams(window.location.search).get(name);
 }
 
 async function loadTest() {
@@ -61,100 +61,90 @@ async function loadTest() {
 
     document.getElementById('test-kod').textContent = testKod;
 
-    // TODO: Backenddan savollarni yuklash (hozircha test uchun)
-    // Real loyihada fetch orqali savollarni olasan
-    // Hozircha oddiy misol:
-    tg.showAlert("Test yuklanmoqda... (Backend ulanmagan)");
+    try {
+        // Backenddan savollarni yuklash
+        const res = await fetch(`https://your-domain.com/get-test?kod=${testKod}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-    // Misol uchun statik test (keyin o'zgartiramiz)
-    questions = [
-        { raqam: 1, tur: "yopiq", savol: "2 + 2 nechaga teng?", variantlar: ["3", "4", "5", "6"], togri: "B" },
-        { raqam: 2, tur: "ochiq", savol: "O'zbekiston poytaxti qayer?", togri: "Toshkent" }
-    ];
+        if (!res.ok) throw new Error("Test topilmadi");
 
-    renderAllQuestions();
-    document.getElementById('btn-finish').style.display = 'block';
+        const data = await res.json();
+        
+        document.getElementById('test-nom').textContent = data.nom || "Test";
+        document.getElementById('total-q').textContent = data.questions.length;
+        document.getElementById('test-info').style.display = 'block';
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('questions-container').style.display = 'block';
+        document.getElementById('progress-bar').style.display = 'block';
+        document.getElementById('btn-finish').style.display = 'block';
+
+        questions = data.questions;
+        renderQuestions();
+
+    } catch (e) {
+        console.error(e);
+        tg.showAlert("Testni yuklashda xatolik yuz berdi. Keyinroq urinib ko'ring.");
+        document.getElementById('loading').innerHTML = "❌ Test topilmadi yoki server bilan bog'lanishda muammo.";
+    }
 }
 
-function renderAllQuestions() {
+function renderQuestions() {
     const container = document.getElementById('questions-container');
     container.innerHTML = '';
 
-    questions.forEach((q, index) => {
-        const qDiv = document.createElement('div');
-        qDiv.className = 'question';
-        qDiv.innerHTML = `
-            <div class="q-number">Savol ${q.raqam}</div>
-            <div style="margin-bottom:12px; font-size:16px;">${q.savol}</div>
-        `;
+    questions.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `<div class="q-number">Savol ${q.savol_raqam}</div><div style="margin-bottom:12px;">${q.savol_matni || q.savol}</div>`;
 
-        if (q.tur === "yopiq") {
-            const abcd = document.createElement('div');
-            abcd.className = 'abcd';
+        if (q.tur === "yopiq" || q.tur === "yopiq_savol") {
+            const abcdDiv = document.createElement('div');
+            abcdDiv.className = 'abcd';
             ['A','B','C','D'].forEach((letter, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'option';
-                btn.textContent = letter + ") " + q.variantlar[i];
-                btn.onclick = () => selectAnswer(q.raqam, letter);
-                if (userAnswers[q.raqam] === letter) btn.classList.add('selected');
-                abcd.appendChild(btn);
+                const opt = document.createElement('div');
+                opt.className = 'option';
+                opt.textContent = `${letter}) ${q[`variant${letter.toLowerCase()}`] || q.variantlar?.[i] || ''}`;
+                opt.onclick = () => {
+                    userAnswers[q.savol_raqam] = letter;
+                    renderQuestions(); // refresh
+                };
+                if (userAnswers[q.savol_raqam] === letter) opt.classList.add('selected');
+                abcdDiv.appendChild(opt);
             });
-            qDiv.appendChild(abcd);
+            div.appendChild(abcdDiv);
         } else {
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'open-input';
-            input.placeholder = 'Javobingizni yozing...';
-            input.value = userAnswers[q.raqam] || '';
-            input.onchange = (e) => userAnswers[q.raqam] = e.target.value.trim();
-            qDiv.appendChild(input);
+            input.placeholder = 'Javobingiz...';
+            input.value = userAnswers[q.savol_raqam] || '';
+            input.oninput = (e) => userAnswers[q.savol_raqam] = e.target.value.trim();
+            div.appendChild(input);
         }
-
-        container.appendChild(qDiv);
+        container.appendChild(div);
     });
-
-    updateProgress();
-}
-
-function selectAnswer(raqam, letter) {
-    userAnswers[raqam] = letter;
-    renderAllQuestions(); // refresh
-}
-
-function updateProgress() {
-    const total = questions.length;
-    const answered = Object.keys(userAnswers).length;
-    const percent = total ? Math.round((answered / total) * 100) : 0;
-    document.getElementById('progress-fill').style.width = percent + '%';
-    document.getElementById('current-q').textContent = answered;
-    document.getElementById('total-q').textContent = total;
 }
 
 document.getElementById('btn-finish').addEventListener('click', () => {
-    if (Object.keys(userAnswers).length < questions.length) {
-        if (!confirm("Hamma savollarga javob bermadingiz. Baribir yakunlaysizmi?")) return;
-    }
+    const javoblar = Object.keys(userAnswers).map(raqam => ({
+        savol_raqam: parseInt(raqam),
+        javob: userAnswers[raqam]
+    }));
 
-    const javoblar = [];
-    questions.forEach(q => {
-        javoblar.push({
-            savol_raqam: q.raqam,
-            javob: userAnswers[q.raqam] || ""
-        });
-    });
-
-    const data = {
+    const dataToSend = {
         test_kod: testKod,
         javoblar: javoblar
     };
 
-    tg.sendData(JSON.stringify(data));
-    tg.showAlert("✅ Javoblaringiz yuborildi!");
+    tg.sendData(JSON.stringify(dataToSend));
+    tg.showAlert("✅ Javoblaringiz botga yuborildi!");
+    setTimeout(() => tg.close(), 1500);
 });
 
 tg.BackButton.onClick(() => tg.close());
 
-// Sahifa yuklanganda ishga tushirish
 window.onload = loadTest;
 </script>
 </body>
