@@ -51,7 +51,6 @@
         <div class="q-card">
             <div id="q-text" class="q-text"></div>
             
-            <!-- Yopiq savollar uchun (ABCD) -->
             <div id="sec-y" class="abcd">
                 <button class="abcd-btn" onclick="selectOpt('A')"><span>A</span> <span id="v-A"></span></button>
                 <button class="abcd-btn" onclick="selectOpt('B')"><span>B</span> <span id="v-B"></span></button>
@@ -59,7 +58,6 @@
                 <button class="abcd-btn" onclick="selectOpt('D')"><span>D</span> <span id="v-D"></span></button>
             </div>
 
-            <!-- Ochiq savollar uchun (Input) -->
             <div id="sec-o" style="display:none;">
                 <input type="text" id="inp-o" placeholder="Javobingizni yozing..." oninput="saveOchiq()">
             </div>
@@ -77,34 +75,29 @@
     tg.expand();
 
     let questions = [];
-    let answers = {};
+    let answers = {}; // format: {1: "A", 2: "B"}
     let curIdx = 0;
     let testKod = "";
 
-    // URL dan ma'lumotlarni o'qish
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data'); // Buni webapp.py dan yuboramiz
+        const dataParam = params.get('data');
 
         if (dataParam) {
             try {
                 const decoded = JSON.parse(decodeURIComponent(dataParam));
-                if (decoded.action === "load_questions") {
-                    questions = decoded.questions;
-                    testKod = decoded.test.kod;
-                    document.getElementById('t-nom').textContent = decoded.test.nom;
-                    document.getElementById('t-kod').textContent = decoded.test.kod;
-                    
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('main').style.display = 'block';
-                    renderQ();
-                }
+                questions = decoded.questions;
+                testKod = decoded.test_kod || (decoded.test ? decoded.test.kod : "");
+                
+                document.getElementById('t-nom').textContent = decoded.test_nom || (decoded.test ? decoded.test.nom : "Test");
+                document.getElementById('t-kod').textContent = testKod;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main').style.display = 'block';
+                renderQ();
             } catch (e) {
                 document.getElementById('loading').textContent = "Xatolik: Ma'lumotni o'qib bo'lmadi.";
             }
-        } else {
-            // Agar URL da ma'lumot bo'lmasa, botga so'rov yuborish
-            tg.sendData(JSON.stringify({ action: "get_test_questions", kod: params.get('kod') }));
         }
     };
 
@@ -139,7 +132,10 @@
     function selectOpt(val) {
         answers[curIdx + 1] = val;
         renderQ();
-        setTimeout(() => changeQ(1), 200);
+        // Avtomatik keyingi savolga o'tish (ixtiyoriy)
+        if (curIdx < questions.length - 1) {
+            setTimeout(() => changeQ(1), 300);
+        }
     }
 
     function saveOchiq() {
@@ -177,17 +173,13 @@
 
     function finishTest() {
         if (confirm("Javoblarni yuborasizmi?")) {
-            const final = [];
-            questions.forEach((_, i) => {
-                final.push({
-                    savol_raqam: i + 1,
-                    javob: answers[i + 1] || ""
-                });
-            });
-            tg.sendData(JSON.stringify({
+            // MUHIM: Bot kutayotgan formatga o'tkazamiz
+            // Bot answers: {"1": "A", "2": "B"} ko'rinishida kutmoqda
+            const dataToSend = {
                 test_kod: testKod,
-                javoblar: final
-            }));
+                answers: answers 
+            };
+            tg.sendData(JSON.stringify(dataToSend));
         }
     }
 </script>
