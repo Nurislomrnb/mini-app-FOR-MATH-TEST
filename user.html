@@ -172,15 +172,27 @@
     }
 
     function finishTest() {
+        // 1. Foydalanuvchidan so'raymiz
         if (confirm("Javoblarni yuborasizmi?")) {
-            // MUHIM: Bot kutayotgan formatga o'tkazamiz
-            // Bot answers: {"1": "A", "2": "B"} ko'rinishida kutmoqda
+            
+            // 2. Ma'lumotni tayyorlaymiz (Bot kutayotgan formatda)
             const dataToSend = {
-                test_kod: testKod,
-                answers: answers 
+                test_kod: testKod, // Yuqorida window.onload da olingan
+                answers: answers   // Sizdagi answers = {1: "A", 2: "B"} obyekti
             };
-            tg.sendData(JSON.stringify(dataToSend));
+
+            // 3. Konsolga chiqaramiz (Tekshirish uchun)
+            console.log("Yuborilayotgan ma'lumot:", dataToSend);
+
+            // 4. Telegramga yuboramiz
+            if (window.Telegram && window.Telegram.WebApp) {
+                // MUHIM: tg.sendData faqat KeyboardButton orqali ochilganda ishlaydi
+                window.Telegram.WebApp.sendData(JSON.stringify(dataToSend));
+            } else {
+                alert("Telegram WebApp muhiti topilmadi!");
+            }
         }
+    }
     }
 </script>
 </body>
