@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -698,6 +698,10 @@ function renderReview() {
 }
 
 function saveTest() {
+  console.log("saveTest chaqirildi");
+  console.log("tg:", tg);
+  console.log("tg.initData:", tg.initData);
+  
   const answers = [];
   for (let i = 1; i <= state.totalQ; i++) {
     answers.push({
@@ -715,6 +719,16 @@ function saveTest() {
     answers: answers
   };
 
+  console.log("Yuboriladigan data:", JSON.stringify(data));
+  
+  try {
+    tg.sendData(JSON.stringify(data));
+    console.log("sendData muvaffaqiyatli!");
+  } catch(e) {
+    console.error("sendData xatosi:", e);
+    alert("Xato: " + e.message);
+  }
+}
   tg.sendData(JSON.stringify(data));
 }
 </script>
