@@ -7,36 +7,22 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f12; color: #e8e8f0; min-height: 100vh; padding: 16px; }
-    h1 { text-align: center; margin-bottom: 20px; color: #6c63ff; }
-    .test-info { background: #1a1a22; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f12; color: #e8e8f0; padding: 16px; }
+    h1 { text-align: center; color: #6c63ff; margin-bottom: 20px; }
     .question { background: #1a1a22; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
-    .q-number { font-size: 18px; font-weight: 700; color: #6c63ff; margin-bottom: 12px; }
-    .abcd { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .option { padding: 16px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; font-size: 17px; cursor: pointer; text-align: center; }
+    .q-num { font-size: 18px; font-weight: bold; color: #6c63ff; margin-bottom: 10px; }
+    .abcd { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .option { padding: 16px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; cursor: pointer; font-size: 16px; }
     .option.selected { border-color: #6c63ff; background: rgba(108,99,255,0.25); }
-    .open-input { width: 100%; padding: 14px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; color: #e8e8f0; font-size: 16px; margin-top: 8px; }
-    .btn { width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
-    .btn-primary { background: #6c63ff; color: white; }
-    .loading { text-align: center; padding: 40px; color: #888; }
+    .open-input { width: 100%; padding: 14px; background: #22222e; border: 2px solid #2e2e3e; border-radius: 10px; color: white; font-size: 16px; margin-top: 8px; }
+    .btn { width: 100%; padding: 16px; background: #4ade80; color: black; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; margin-top: 20px; }
 </style>
 </head>
 <body>
 
 <h1 id="test-nom">Test yuklanmoqda...</h1>
-<div class="test-info" id="test-info" style="display:none;">
-  <div>Kod: <b id="test-kod"></b></div>
-  <div>Savollar soni: <b id="total-q">0</b></div>
-</div>
-
-<div id="loading" class="loading">Savollar yuklanmoqda...</div>
-<div id="questions-container" style="display:none;"></div>
-
-<div class="progress" style="height:6px; background:#2e2e3e; border-radius:3px; margin:20px 0; display:none;" id="progress-bar">
-  <div class="progress-fill" id="progress-fill" style="height:100%; background:#6c63ff; border-radius:3px; width:0%;"></div>
-</div>
-
-<button class="btn btn-primary" id="btn-finish" style="display:none;">✅ Testni Yakunlash va Yuborish</button>
+<div id="questions-container"></div>
+<button id="finish-btn" class="btn" style="display: none;">✅ Testni Yakunlash va Yuborish</button>
 
 <script>
 const tg = window.Telegram.WebApp;
@@ -47,104 +33,85 @@ let testKod = "";
 let questions = [];
 let userAnswers = {};
 
-// URL dan kod olish
-function getQueryParam(name) {
-    return new URLSearchParams(window.location.search).get(name);
-}
+// URL dan kodni olish
+testKod = new URLSearchParams(window.location.search).get("kod");
 
 async function loadTest() {
-    testKod = getQueryParam('kod');
     if (!testKod) {
         tg.showAlert("Test kodi topilmadi!");
         return;
     }
 
-    document.getElementById('test-kod').textContent = testKod;
+    document.getElementById("test-nom").textContent = `Test: ${testKod}`;
 
-    try {
-        // Backenddan savollarni yuklash
-        const res = await fetch(`https://https://github.com/Nurislomrnb/mini-app-FOR-MATH-TEST/get-test?kod=${testKod}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
+    // Botga savollarni so'rash uchun xabar yuboramiz
+    tg.sendData(JSON.stringify({
+        action: "get_test_questions",
+        kod: testKod
+    }));
 
-        if (!res.ok) throw new Error("Test topilmadi");
-
-        const data = await res.json();
-        
-        document.getElementById('test-nom').textContent = data.nom || "Test";
-        document.getElementById('total-q').textContent = data.questions.length;
-        document.getElementById('test-info').style.display = 'block';
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('questions-container').style.display = 'block';
-        document.getElementById('progress-bar').style.display = 'block';
-        document.getElementById('btn-finish').style.display = 'block';
-
-        questions = data.questions;
-        renderQuestions();
-
-    } catch (e) {
-        console.error(e);
-        tg.showAlert("Testni yuklashda xatolik yuz berdi. Keyinroq urinib ko'ring.");
-        document.getElementById('loading').innerHTML = "❌ Test topilmadi yoki server bilan bog'lanishda muammo.";
-    }
+    tg.showAlert("Savollar yuklanmoqda...");
 }
 
-function renderQuestions() {
-    const container = document.getElementById('questions-container');
-    container.innerHTML = '';
+// Botdan kelgan ma'lumotni qabul qilish (aiogram WebAppData orqali emas, lekin hozircha oddiy usul)
+function renderQuestions(qs) {
+    questions = qs;
+    const container = document.getElementById("questions-container");
+    container.innerHTML = "";
 
-    questions.forEach(q => {
-        const div = document.createElement('div');
-        div.className = 'question';
-        div.innerHTML = `<div class="q-number">Savol ${q.savol_raqam}</div><div style="margin-bottom:12px;">${q.savol_matni || q.savol}</div>`;
+    qs.forEach(q => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `<div class="q-num">Savol ${q.savol_raqam}</div><p>${q.savol_matni || q.savol}</p>`;
 
-        if (q.tur === "yopiq" || q.tur === "yopiq_savol") {
-            const abcdDiv = document.createElement('div');
-            abcdDiv.className = 'abcd';
-            ['A','B','C','D'].forEach((letter, i) => {
-                const opt = document.createElement('div');
-                opt.className = 'option';
-                opt.textContent = `${letter}) ${q[`variant${letter.toLowerCase()}`] || q.variantlar?.[i] || ''}`;
+        if (q.tur === "yopiq") {
+            const grid = document.createElement("div");
+            grid.className = "abcd";
+            ["A","B","C","D"].forEach(letter => {
+                const opt = document.createElement("div");
+                opt.className = "option";
+                opt.textContent = `${letter}) ${q[`variant_${letter.toLowerCase()}`] || ''}`;
                 opt.onclick = () => {
                     userAnswers[q.savol_raqam] = letter;
-                    renderQuestions(); // refresh
+                    renderQuestions(qs); // refresh
                 };
-                if (userAnswers[q.savol_raqam] === letter) opt.classList.add('selected');
-                abcdDiv.appendChild(opt);
+                if (userAnswers[q.savol_raqam] === letter) opt.classList.add("selected");
+                grid.appendChild(opt);
             });
-            div.appendChild(abcdDiv);
+            div.appendChild(grid);
         } else {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'open-input';
-            input.placeholder = 'Javobingiz...';
-            input.value = userAnswers[q.savol_raqam] || '';
-            input.oninput = (e) => userAnswers[q.savol_raqam] = e.target.value.trim();
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "open-input";
+            input.placeholder = "Javobingizni yozing...";
+            input.value = userAnswers[q.savol_raqam] || "";
+            input.onchange = (e) => userAnswers[q.savol_raqam] = e.target.value.trim();
             div.appendChild(input);
         }
         container.appendChild(div);
     });
+
+    document.getElementById("finish-btn").style.display = "block";
 }
 
-document.getElementById('btn-finish').addEventListener('click', () => {
-    const javoblar = Object.keys(userAnswers).map(raqam => ({
-        savol_raqam: parseInt(raqam),
-        javob: userAnswers[raqam]
+// Yakunlash tugmasi
+document.getElementById("finish-btn").addEventListener("click", () => {
+    const javoblar = Object.keys(userAnswers).map(key => ({
+        savol_raqam: parseInt(key),
+        javob: userAnswers[key]
     }));
 
-    const dataToSend = {
+    tg.sendData(JSON.stringify({
         test_kod: testKod,
         javoblar: javoblar
-    };
+    }));
 
-    tg.sendData(JSON.stringify(dataToSend));
-    tg.showAlert("✅ Javoblaringiz botga yuborildi!");
-    setTimeout(() => tg.close(), 1500);
+    tg.showAlert("✅ Javoblaringiz yuborildi! Natija hisoblanmoqda...");
 });
 
 tg.BackButton.onClick(() => tg.close());
 
+// Sahifa yuklanganda
 window.onload = loadTest;
 </script>
 </body>
