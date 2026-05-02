@@ -1,191 +1,308 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Test Ishlash - User</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, sans-serif; background: #0f0f12; color: #e8e8f0; min-height: 100vh; padding-bottom: 90px; }
-        .topbar { background: #1a1a22; border-bottom: 1px solid #2e2e3e; padding: 12px 16px; position: sticky; top: 0; z-index: 10; }
-        .test-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .test-kod { font-family: monospace; font-size: 12px; color: #6c63ff; background: rgba(108,99,255,0.12); padding: 3px 8px; border-radius: 6px; }
-        .progress { height: 4px; background: #2e2e3e; border-radius: 2px; }
-        .progress-fill { height: 100%; background: #6c63ff; width: 0%; transition: 0.3s; }
-        .dots { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
-        .dot { width: 28px; height: 28px; border-radius: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid #2e2e3e; background: #22222e; color: #888; }
-        .dot.cur { border-color: #6c63ff; color: #6c63ff; }
-        .dot.done { background: #6c63ff; border-color: #6c63ff; color: white; }
-        .content { padding: 16px; }
-        .q-card { background: #1a1a22; border: 1px solid #2e2e3e; border-radius: 14px; padding: 18px; min-height: 200px; }
-        .q-text { font-size: 18px; font-weight: 500; margin-bottom: 20px; line-height: 1.4; color: #fff; }
-        .abcd { display: grid; gap: 10px; }
-        .abcd-btn { padding: 16px; border-radius: 12px; border: 2px solid #2e2e3e; background: #22222e; color: #e8e8f0; font-size: 16px; text-align: left; cursor: pointer; transition: 0.2s; }
-        .abcd-btn.sel { border-color: #6c63ff; background: rgba(108,99,255,0.1); color: #a79fff; }
-        .abcd-btn span { font-weight: bold; margin-right: 10px; color: #6c63ff; }
-        input[type="text"] { width: 100%; padding: 15px; background: #22222e; border: 1.5px solid #2e2e3e; border-radius: 12px; color: #fff; font-size: 16px; outline: none; }
-        input:focus { border-color: #6c63ff; }
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a22; border-top: 1px solid #2e2e3e; padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
-        .btn-prev { background: #2e2e3e; color: #888; }
-        .btn-next { background: #6c63ff; color: white; }
-        #loading { padding: 50px; text-align: center; color: #888; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Test Ishlash</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f12; color: #e8e8f0; min-height: 100vh; padding-bottom: 90px; }
+
+.topbar { background: #1a1a22; border-bottom: 1px solid #2e2e3e; padding: 12px 16px; position: sticky; top: 0; z-index: 10; }
+.test-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.test-name { font-size: 14px; font-weight: 700; }
+.test-kod { font-family: monospace; font-size: 12px; color: #6c63ff; background: rgba(108,99,255,0.12); padding: 3px 8px; border-radius: 6px; }
+.progress { height: 4px; background: #2e2e3e; border-radius: 2px; margin-bottom: 8px; }
+.progress-fill { height: 100%; background: #6c63ff; border-radius: 2px; transition: width 0.3s; }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.dot { width: 24px; height: 24px; border-radius: 6px; font-size: 9px; font-weight: 700; font-family: monospace; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid #2e2e3e; background: #22222e; color: #888; transition: all 0.15s; }
+.dot.done { background: #6c63ff; border-color: #6c63ff; color: white; }
+.dot.cur { border-color: #6c63ff; color: #6c63ff; }
+
+.content { padding: 16px; }
+.q-card { background: #1a1a22; border: 1px solid #2e2e3e; border-radius: 14px; padding: 18px; }
+.q-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.q-number { font-size: 32px; font-weight: 700; color: #6c63ff; font-family: monospace; }
+.q-pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.pill-y { background: rgba(108,99,255,0.15); color: #a79fff; }
+.pill-o { background: rgba(255,101,132,0.15); color: #ff8fa3; }
+
+.abcd { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.abcd-btn { padding: 20px; border-radius: 12px; border: 2px solid #2e2e3e; background: #22222e; color: #e8e8f0; font-size: 26px; font-weight: 700; cursor: pointer; font-family: monospace; transition: all 0.15s; }
+.abcd-btn.sel { border-color: #6c63ff; background: rgba(108,99,255,0.15); color: #a79fff; }
+.abcd-btn:active { transform: scale(0.95); }
+
+input[type="text"] { width: 100%; padding: 13px 14px; background: #22222e; border: 1.5px solid #2e2e3e; border-radius: 10px; color: #e8e8f0; font-size: 15px; outline: none; margin-top: 8px; }
+input[type="text"]:focus { border-color: #6c63ff; }
+input::placeholder { color: #555; }
+
+.done-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; background: rgba(74,222,128,0.1); color: #4ade80; margin-top: 10px; }
+
+.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a22; border-top: 1px solid #2e2e3e; padding: 12px 16px; }
+.nav-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn { display: block; width: 100%; padding: 13px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-outline { background: transparent; border: 1.5px solid #2e2e3e; color: #888; }
+.btn-primary { background: #6c63ff; color: white; }
+.btn-submit { background: #4ade80; color: #000; grid-column: 1/-1; font-size: 15px; }
+.btn:active { opacity: 0.8; }
+
+/* Loading */
+#loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 14px; }
+.spinner { width: 38px; height: 38px; border: 3px solid #2e2e3e; border-top-color: #6c63ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#main { display: none; }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; display: none; align-items: flex-end; }
+.modal-bg.open { display: flex; }
+.modal { background: #1a1a22; border-radius: 18px 18px 0 0; padding: 22px 16px 30px; width: 100%; }
+.modal h3 { font-size: 17px; margin-bottom: 8px; }
+.modal p { font-size: 13px; color: #888; margin-bottom: 18px; }
+.modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
 </head>
 <body>
 
-<div id="loading">Savollar yuklanmoqda...</div>
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:#888;">Test yuklanmoqda...</div>
+</div>
 
-<div id="main" style="display:none;">
-    <div class="topbar">
-        <div class="test-meta">
-            <div id="t-nom" class="test-name">Test</div>
-            <div id="t-kod" class="test-kod">0000</div>
+<div id="main">
+  <div class="topbar">
+    <div class="test-meta">
+      <div class="test-name" id="t-nom">—</div>
+      <div class="test-kod" id="t-kod">—</div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="dots" id="dots-row"></div>
+  </div>
+
+  <div class="content">
+    <div class="q-card">
+      <div class="q-top">
+        <div class="q-number" id="q-num">1</div>
+        <div class="q-pill pill-y" id="q-pill">Yopiq</div>
+      </div>
+
+      <div id="sec-y">
+        <div style="font-size:13px;color:#888;margin-bottom:10px;">Javobni tanlang:</div>
+        <div class="abcd">
+          <button class="abcd-btn" id="btn-A">A</button>
+          <button class="abcd-btn" id="btn-B">B</button>
+          <button class="abcd-btn" id="btn-C">C</button>
+          <button class="abcd-btn" id="btn-D">D</button>
         </div>
-        <div class="progress"><div id="prog-fill" class="progress-fill"></div></div>
-        <div id="dots-row" class="dots"></div>
-    </div>
+      </div>
 
-    <div class="content">
-        <div class="q-card">
-            <div id="q-text" class="q-text"></div>
-            
-            <div id="sec-y" class="abcd">
-                <button class="abcd-btn" onclick="selectOpt('A')"><span>A</span> <span id="v-A"></span></button>
-                <button class="abcd-btn" onclick="selectOpt('B')"><span>B</span> <span id="v-B"></span></button>
-                <button class="abcd-btn" onclick="selectOpt('C')"><span>C</span> <span id="v-C"></span></button>
-                <button class="abcd-btn" onclick="selectOpt('D')"><span>D</span> <span id="v-D"></span></button>
-            </div>
+      <div id="sec-o" style="display:none;">
+        <div style="font-size:13px;color:#888;">Javobingizni yozing:</div>
+        <input type="text" id="inp-o" placeholder="Javob...">
+      </div>
 
-            <div id="sec-o" style="display:none;">
-                <input type="text" id="inp-o" placeholder="Javobingizni yozing..." oninput="saveOchiq()">
-            </div>
-        </div>
+      <div id="done-mark" style="display:none;">
+        <div class="done-badge">✓ Javob kiritildi</div>
+      </div>
     </div>
+  </div>
 
-    <div class="nav-bar">
-        <button class="btn btn-prev" onclick="changeQ(-1)">← Oldingi</button>
-        <button class="btn btn-next" id="btn-next" onclick="changeQ(1)">Keyingi →</button>
+  <div class="nav-bar">
+    <div class="nav-row" id="nav-row">
+      <button class="btn btn-outline" id="btn-prev">← Oldingi</button>
+      <button class="btn btn-primary" id="btn-next">Keyingi →</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>Testni yakunlash</h3>
+    <p id="modal-txt">Yuborishni tasdiqlaysizmi?</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" id="modal-cancel">Orqaga</button>
+      <button class="btn btn-primary" id="modal-ok">✅ Yuborish</button>
+    </div>
+  </div>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+var tg = window.Telegram.WebApp;
+tg.expand();
 
-    let questions = [];
-    let answers = {}; // format: {1: "A", 2: "B"}
-    let curIdx = 0;
-    let testKod = "";
+var testData = null;
+var answers = {};
+var curQ = 1;
+var totalQ = 0;
 
-    window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data');
+function getParams() {
+  var p = new URLSearchParams(window.location.search);
+  return {
+    kod: p.get('kod') || '',
+    nom: p.get('nom') || 'Test',
+    yopiq: parseInt(p.get('y') || '0'),
+    ochiq: parseInt(p.get('o') || '0')
+  };
+}
 
-        if (dataParam) {
-            try {
-                const decoded = JSON.parse(decodeURIComponent(dataParam));
-                questions = decoded.questions;
-                testKod = decoded.test_kod || (decoded.test ? decoded.test.kod : "");
-                
-                document.getElementById('t-nom').textContent = decoded.test_nom || (decoded.test ? decoded.test.nom : "Test");
-                document.getElementById('t-kod').textContent = testKod;
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main').style.display = 'block';
-                renderQ();
-            } catch (e) {
-                document.getElementById('loading').textContent = "Xatolik: Ma'lumotni o'qib bo'lmadi.";
-            }
-        }
-    };
+function getType(n) { return n <= testData.yopiq ? 'yopiq' : 'ochiq'; }
 
-    function renderQ() {
-        const q = questions[curIdx];
-        document.getElementById('q-text').innerHTML = `<b>${curIdx + 1}.</b> ${q.savol_matni}`;
-        
-        if (q.tur === 'yopiq') {
-            document.getElementById('sec-y').style.display = 'grid';
-            document.getElementById('sec-o').style.display = 'none';
-            document.getElementById('v-A').textContent = q.variant_A;
-            document.getElementById('v-B').textContent = q.variant_B;
-            document.getElementById('v-C').textContent = q.variant_C;
-            document.getElementById('v-D').textContent = q.variant_D;
+function init() {
+  var p = getParams();
+  if (!p.kod) {
+    document.getElementById('loading').innerHTML = '<div style="color:#ff6584;padding:20px;text-align:center;">Test kodi topilmadi!</div>';
+    return;
+  }
+  testData = p;
+  totalQ = p.yopiq + p.ochiq;
 
-            const btns = document.querySelectorAll('.abcd-btn');
-            btns.forEach((b, i) => {
-                const val = ['A', 'B', 'C', 'D'][i];
-                b.classList.toggle('sel', answers[curIdx + 1] === val);
-            });
-        } else {
-            document.getElementById('sec-y').style.display = 'none';
-            document.getElementById('sec-o').style.display = 'block';
-            document.getElementById('inp-o').value = answers[curIdx + 1] || '';
-        }
+  document.getElementById('t-nom').textContent = decodeURIComponent(p.nom);
+  document.getElementById('t-kod').textContent = p.kod;
 
-        document.getElementById('btn-next').textContent = (curIdx === questions.length - 1) ? "Tugatish ✓" : "Keyingi →";
-        renderDots();
-        updateProgress();
+  // Dots
+  var dotsEl = document.getElementById('dots-row');
+  for (var i = 1; i <= totalQ; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i===1?' cur':'');
+    d.id = 'dot-'+i;
+    d.textContent = i;
+    (function(n){ d.addEventListener('click', function(){ saveCurrentOchiq(); goToQ(n); }); })(i);
+    dotsEl.appendChild(d);
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+
+  renderQ(1);
+}
+
+function updateDots() {
+  for (var i = 1; i <= totalQ; i++) {
+    var d = document.getElementById('dot-'+i);
+    if (!d) continue;
+    d.className = 'dot' + (i===curQ?' cur':answers[i]!==undefined?' done':'');
+  }
+}
+
+function updateProgress() {
+  var done = Object.keys(answers).length;
+  document.getElementById('prog-fill').style.width = (done/totalQ*100)+'%';
+}
+
+function renderQ(n) {
+  curQ = n;
+  var type = getType(n);
+
+  document.getElementById('q-num').textContent = n;
+  var pill = document.getElementById('q-pill');
+  pill.textContent = type==='yopiq'?'Yopiq':'Ochiq';
+  pill.className = 'q-pill '+(type==='yopiq'?'pill-y':'pill-o');
+
+  document.getElementById('sec-y').style.display = type==='yopiq'?'block':'none';
+  document.getElementById('sec-o').style.display = type==='ochiq'?'block':'none';
+  document.getElementById('done-mark').style.display = answers[n]!==undefined?'block':'none';
+
+  if (type==='yopiq') {
+    ['A','B','C','D'].forEach(function(l){
+      document.getElementById('btn-'+l).className = 'abcd-btn'+(answers[n]===l?' sel':'');
+    });
+  } else {
+    document.getElementById('inp-o').value = answers[n]||'';
+  }
+
+  document.getElementById('btn-next').textContent = n===totalQ ? 'Yakunlash ✓' : 'Keyingi →';
+  updateDots();
+  updateProgress();
+}
+
+function saveCurrentOchiq() {
+  if (getType(curQ)==='ochiq') {
+    var val = document.getElementById('inp-o').value.trim();
+    if (val) answers[curQ] = val;
+  }
+}
+
+function goToQ(n) {
+  renderQ(n);
+}
+
+// ABCD buttons
+['A','B','C','D'].forEach(function(l){
+  document.getElementById('btn-'+l).addEventListener('click', function(){
+    answers[curQ] = l;
+    ['A','B','C','D'].forEach(function(x){
+      document.getElementById('btn-'+x).className = 'abcd-btn'+(x===l?' sel':'');
+    });
+    document.getElementById('done-mark').style.display = 'block';
+    updateDots();
+    updateProgress();
+    // Auto next
+    if (curQ < totalQ) {
+      setTimeout(function(){ curQ++; renderQ(curQ); }, 300);
     }
+  });
+});
 
-    function selectOpt(val) {
-        answers[curIdx + 1] = val;
-        renderQ();
-        // Avtomatik keyingi savolga o'tish (ixtiyoriy)
-        if (curIdx < questions.length - 1) {
-            setTimeout(() => changeQ(1), 300);
-        }
-    }
+// Prev
+document.getElementById('btn-prev').addEventListener('click', function(){
+  saveCurrentOchiq();
+  if (curQ > 1) renderQ(curQ-1);
+});
 
-    function saveOchiq() {
-        answers[curIdx + 1] = document.getElementById('inp-o').value;
-    }
+// Next
+document.getElementById('btn-next').addEventListener('click', function(){
+  saveCurrentOchiq();
+  if (getType(curQ)==='ochiq') {
+    var val = document.getElementById('inp-o').value.trim();
+    if (!val && answers[curQ]===undefined) { tg.showAlert('Javobni kiriting!'); return; }
+    if (val) answers[curQ] = val;
+  }
+  if (curQ < totalQ) {
+    curQ++;
+    renderQ(curQ);
+  } else {
+    openModal();
+  }
+});
 
-    function changeQ(dir) {
-        if (dir === 1 && curIdx === questions.length - 1) {
-            finishTest();
-            return;
-        }
-        const newIdx = curIdx + dir;
-        if (newIdx >= 0 && newIdx < questions.length) {
-            curIdx = newIdx;
-            renderQ();
-        }
-    }
+// Modal
+function openModal() {
+  var done = Object.keys(answers).length;
+  var left = totalQ - done;
+  var txt = done+'/'+totalQ+' savol javob berildi.';
+  if (left > 0) txt += ' '+left+' ta savol javobsiz.';
+  txt += ' Yuborishni tasdiqlaysizmi?';
+  document.getElementById('modal-txt').textContent = txt;
+  document.getElementById('modal').classList.add('open');
+}
 
-    function renderDots() {
-        const row = document.getElementById('dots-row');
-        row.innerHTML = '';
-        questions.forEach((_, i) => {
-            const d = document.createElement('div');
-            d.className = `dot ${i === curIdx ? 'cur' : ''} ${answers[i+1] ? 'done' : ''}`;
-            d.textContent = i + 1;
-            d.onclick = () => { curIdx = i; renderQ(); };
-            row.appendChild(d);
-        });
-    }
+document.getElementById('modal-cancel').addEventListener('click', function(){
+  document.getElementById('modal').classList.remove('open');
+});
 
-    function updateProgress() {
-        const done = Object.keys(answers).length;
-        document.getElementById('prog-fill').style.width = (done / questions.length * 100) + '%';
-    }
+document.getElementById('modal-ok').addEventListener('click', function(){
+  var javoblar = [];
+  for (var i = 1; i <= totalQ; i++) {
+    javoblar.push({ savol_raqam: i, javob: answers[i] || '' });
+  }
+  var data = { test_kod: testData.kod, javoblar: javoblar };
+  tg.sendData(JSON.stringify(data));
+});
 
-    function finishTest() {
-        if (confirm("Javoblarni yuborasizmi?")) {
-            const final = [];
-            questions.forEach((_, i) => {
-                final.push({
-                    savol_raqam: i + 1,
-                    javob: answers[i + 1] || ""
-                });
-            });
-            tg.sendData(JSON.stringify({
-                test_kod: testKod,
-                javoblar: final
-            }));
-        }
-    }
+tg.BackButton.show();
+tg.BackButton.onClick(function(){
+  if (document.getElementById('modal').classList.contains('open')) {
+    document.getElementById('modal').classList.remove('open');
+  } else if (curQ > 1) {
+    saveCurrentOchiq();
+    renderQ(curQ-1);
+  } else {
+    tg.close();
+  }
+});
+
+init();
 </script>
 </body>
 </html>
